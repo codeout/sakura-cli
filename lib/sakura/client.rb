@@ -1,7 +1,9 @@
 require 'capybara/poltergeist'
 require 'sakura'
+require 'sakura/cli/version'
 
 Capybara.default_driver = :poltergeist
+Capybara.current_session.driver.headers = {'User-Agent' => "sakura-cli/#{Sakura::Cli::VERSION}"}
 
 module Sakura
   class Client
