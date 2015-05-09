@@ -9,6 +9,11 @@ module Sakura
 
     attr_reader :domain
 
+    def self.current_session
+      @current_session ||= new
+    end
+
+
     def initialize
       @domain, @passwd = credentials
     end

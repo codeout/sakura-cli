@@ -1,6 +1,19 @@
+require 'sakura/client'
+
 module Sakura
   class MailAddress
+    MAIL_URL = BASE_URL + 'rs/mail'
+
     class << self
+      def all
+        page = Client.current_session.get(MAIL_URL)
+
+        page.all(:xpath, '//a[contains(@href, "mail?Username=")]/../..').map{|element|
+          arguments = element.all('td').map(&:text)[0..-2] + element.all('a').map{|i| i[:href] }
+          Sakura::MailAddress.new(*arguments)
+        }
+      end
+
       def header
         str = tabularize('address', 'virus_check', 'usage', 'quota')
         "#{str}\n#{'-' * (str.size+1)}"
