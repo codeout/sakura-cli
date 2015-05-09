@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require 'pathname'
+
+$: << File.expand_path('../../lib', Pathname.new(__FILE__).realpath)
+
+require 'sakura/cli/root'
+Sakura::Cli::Root.start
