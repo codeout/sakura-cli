@@ -8,19 +8,14 @@ module Sakura
 
     class << self
       def create(local_part, password)
-        page = Client.current_session.process(MAIL_URL) {
+        Client.current_session.process(MAIL_URL) do
           fill_in 'NewUsername', with: local_part
           fill_in 'Password1',   with: password
           fill_in 'Password2',   with: password
           find('input[name="Submit_useradd"]').click
-        }
-
-        error = page.all('.error-message')
-        if error.empty?
-          true
-        else
-          raise error.first.text
         end
+
+        true
       end
 
       def all
@@ -65,17 +60,12 @@ module Sakura
     end
 
     def quota=(value)
-      page = Client.current_session.process(MAIL_URL + @link) {
+      Client.current_session.process(MAIL_URL + @link) do
         fill_in 'MailQuota', with: value
         find('input[name="Submit_quotaedit"]').click
-      }
-
-      error = page.all('.error-message')
-      if error.empty?
-        true
-      else
-        raise error.first.text
       end
+
+      true
     end
 
     def to_s

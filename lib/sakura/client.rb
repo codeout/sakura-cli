@@ -31,6 +31,8 @@ module Sakura
       find('form input[type=image]').click
 
       @last_login = Time.now if page.text =~ /ログインドメイン: #{@domain}/
+
+      raise_when_error
       login?
     end
 
@@ -44,6 +46,8 @@ module Sakura
       login unless login?
       visit url
       instance_eval &block
+
+      raise_when_error
       page
     end
 
@@ -59,6 +63,11 @@ module Sakura
       else
         exit 1
       end
+    end
+
+    def raise_when_error
+      error = page.all('.error-message')
+      raise error.first.text unless error.empty?
     end
   end
 end
