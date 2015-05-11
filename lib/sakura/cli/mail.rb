@@ -11,7 +11,7 @@ module Sakura
         addrs = MailAddress.all
 
         puts "# domain: #{Client.current_session.domain}"
-        puts Sakura::MailAddress.header
+        puts MailAddress.header
         addrs.each {|addr| puts addr.to_s }
       end
     end

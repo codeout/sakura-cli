@@ -23,7 +23,7 @@ module Sakura
 
         page.all(:xpath, '//a[contains(@href, "mail?Username=")]/../..').map{|element|
           arguments = element.all('td').map(&:text)[0..-2] + element.all('a').map{|i| i[:href] }
-          Sakura::MailAddress.new(*arguments)
+          MailAddress.new(*arguments)
         }
       end
 
