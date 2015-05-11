@@ -143,7 +143,7 @@ module Sakura
       @forward_list << mail
     end
 
-    def remove_forward_to(mail)
+    def delete_forward_to(mail)
       Client.current_session.process(MAIL_URL + @link) do
         find_field('DeleteAddress[]').select(mail)
         find('a[href="javascript:tr_delete();"]').click

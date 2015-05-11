@@ -48,7 +48,7 @@ class MailAddressTest < Test::Unit::TestCase
     mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
     assert_equal mail.forward_list, [mail_to_forward]
 
-    mail.remove_forward_to(mail_to_forward)
+    mail.delete_forward_to(mail_to_forward)
     mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
     assert_empty mail.forward_list
   end
