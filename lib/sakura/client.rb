@@ -40,6 +40,13 @@ module Sakura
       page
     end
 
+    def process(url, &block)
+      login unless login?
+      visit url
+      instance_eval &block
+      page
+    end
+
 
     private
 

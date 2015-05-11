@@ -4,7 +4,25 @@ module Sakura
   class MailAddress
     MAIL_URL = BASE_URL + 'rs/mail'
 
+    attr_reader :address, :virus_check, :usage, :quota, :link, :link_to_delete
+
     class << self
+      def create(local_part, password)
+        page = Client.current_session.process(MAIL_URL) {
+          fill_in 'NewUsername', with: local_part
+          fill_in 'Password1',   with: password
+          fill_in 'Password2',   with: password
+          find('input[name="Submit_useradd"]').click
+        }
+
+        error = page.all('.error-message')
+        if error.empty?
+          true
+        else
+          raise error.first.text
+        end
+      end
+
       def all
         page = Client.current_session.get(MAIL_URL)
 
@@ -35,6 +53,15 @@ module Sakura
       @quota          = quota
       @link           = link
       @link_to_delete = link_to_delete
+    end
+
+    def delete
+      link = @link_to_delete
+      Client.current_session.process(MAIL_URL) do
+        find("a[href=\"#{link}\"]").click
+      end
+
+      true
     end
 
     def to_s
