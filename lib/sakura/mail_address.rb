@@ -64,8 +64,6 @@ module Sakura
         fill_in 'MailQuota', with: value
         find('input[name="Submit_quotaedit"]').click
       end
-
-      true
     end
 
     def to_s
