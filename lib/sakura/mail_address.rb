@@ -60,10 +60,13 @@ module Sakura
     end
 
     def quota=(value)
-      Client.current_session.process(MAIL_URL + @link) do
+      page = Client.current_session.process(MAIL_URL + @link) {
         fill_in 'MailQuota', with: value
         find('input[name="Submit_quotaedit"]').click
-      end
+      }
+
+      page.text =~ /利用中のディスク領域: \S+ \/ (\S+)/
+      @quota = $1
     end
 
     def password=(value)
@@ -79,6 +82,8 @@ module Sakura
       Client.current_session.process(MAIL_URL + @link) do
         find("input[name='VirusScan'][value='#{value}']").click
       end
+
+      @virus_scan = value == 1
     end
 
     def enable_virus_scan
