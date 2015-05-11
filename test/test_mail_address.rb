@@ -16,8 +16,8 @@ class MailAddressTest < Test::Unit::TestCase
   test 'Increase the quota' do
     mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
     old_value = mail.quota
-    mail.quota = old_value.to_i + 1
 
+    mail.quota = old_value.to_i + 1
     mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
     assert_not_equal mail.quota, old_value
   end
@@ -25,6 +25,18 @@ class MailAddressTest < Test::Unit::TestCase
   test 'Change the password' do
     mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
     assert_nothing_raised { mail.password = password }
+  end
+
+  test 'Switch virus scan' do
+    mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
+
+    mail.virus_scan = true
+    mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
+    assert_true mail.virus_scan
+
+    mail.virus_scan = false
+    mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
+    assert_false mail.virus_scan
   end
 
   test 'Delete a mail address' do

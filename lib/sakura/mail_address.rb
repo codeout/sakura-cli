@@ -4,7 +4,7 @@ module Sakura
   class MailAddress
     MAIL_URL = BASE_URL + 'rs/mail'
 
-    attr_reader :address, :virus_check, :usage, :quota, :link, :link_to_delete
+    attr_reader :address, :virus_scan, :usage, :quota, :link, :link_to_delete
 
     class << self
       def create(local_part, password)
@@ -28,7 +28,7 @@ module Sakura
       end
 
       def header
-        str = tabularize('address', 'virus_check', 'usage', 'quota')
+        str = tabularize('address', 'virus_scan', 'usage', 'quota')
         "#{str}\n#{'-' * (str.size+1)}"
       end
 
@@ -41,9 +41,9 @@ module Sakura
     end
 
 
-    def initialize(address, virus_check, usage, quota, link, link_to_delete=nil)
+    def initialize(address, virus_scan, usage, quota, link, link_to_delete=nil)
       @address        = address
-      @virus_check    = virus_check == '○'
+      @virus_scan     = virus_scan == '○'
       @usage          = usage
       @quota          = quota
       @link           = link
@@ -74,8 +74,23 @@ module Sakura
       end
     end
 
+    def virus_scan=(value)
+      value = value ? 1 : 0
+      Client.current_session.process(MAIL_URL + @link) do
+        find("input[name='VirusScan'][value='#{value}']").click
+      end
+    end
+
+    def enable_virus_scan
+      virus_scan = true
+    end
+
+    def disable_virus_scan
+      virus_scan = false
+    end
+
     def to_s
-      self.class.tabularize(@address, @virus_check, @usage, @quota)
+      self.class.tabularize(@address, @virus_scan, @usage, @quota)
     end
   end
 end
