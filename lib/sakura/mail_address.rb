@@ -27,6 +27,10 @@ module Sakura
         }
       end
 
+      def find(local_part)
+        all.find {|m| m.address == local_part }
+      end
+
       def header
         str = tabularize('address', 'virus_scan', 'usage', 'quota')
         "#{str}\n#{'-' * (str.size+1)}"
