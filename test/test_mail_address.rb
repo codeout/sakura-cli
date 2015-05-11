@@ -5,10 +5,11 @@ require 'pry'
 class MailAddressTest < Test::Unit::TestCase
   self.test_order = :defined
   new_mail = 'dummy'
+  password = 'dummy000'
 
   test 'Create a new mail address' do
     assert_false Sakura::MailAddress.all.any? {|m| m.address == new_mail }
-    assert_true  Sakura::MailAddress.create(new_mail, 'dummy000')
+    assert_true  Sakura::MailAddress.create(new_mail, password)
     assert_true  Sakura::MailAddress.all.any? {|m| m.address == new_mail }
   end
 
@@ -19,6 +20,11 @@ class MailAddressTest < Test::Unit::TestCase
 
     mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
     assert_not_equal mail.quota, old_value
+  end
+
+  test 'Change the password' do
+    mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
+    assert_nothing_raised { mail.password = password }
   end
 
   test 'Delete a mail address' do

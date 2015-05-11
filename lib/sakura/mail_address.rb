@@ -66,6 +66,14 @@ module Sakura
       end
     end
 
+    def password=(value)
+      Client.current_session.process(MAIL_URL + @link) do
+        fill_in 'Password1', with: value
+        fill_in 'Password2', with: value
+        find('input[name="Submit_password"]').click
+      end
+    end
+
     def to_s
       self.class.tabularize(@address, @virus_check, @usage, @quota)
     end
