@@ -120,6 +120,39 @@ module Sakura
       keep = false
     end
 
+    def forward_list
+      if @forward_list.nil?
+        page = Client.current_session.get(MAIL_URL + @link)
+        @forward_list = page.all('select[name="DeleteAddress[]"] option').map(&:text)
+      end
+
+      @forward_list
+    end
+
+    def forward_to(mail)
+      Client.current_session.process(MAIL_URL + @link) do
+        execute_script <<-JS
+          var f = document.Transfer;
+          f.Address.value = '#{mail}';
+          f.SubAction.value = 'add';
+          f.submit();
+        JS
+      end
+
+      @forward_list ||= []
+      @forward_list << mail
+    end
+
+    def remove_forward_to(mail)
+      Client.current_session.process(MAIL_URL + @link) do
+        find_field('DeleteAddress[]').select(mail)
+        find('a[href="javascript:tr_delete();"]').click
+      end
+
+      @forward_list ||= []
+      @forward_list.delete mail
+    end
+
     def to_s
       self.class.tabularize(@address, @virus_scan, @usage, @quota)
     end

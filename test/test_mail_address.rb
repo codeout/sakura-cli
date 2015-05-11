@@ -6,6 +6,7 @@ class MailAddressTest < Test::Unit::TestCase
   self.test_order = :defined
   new_mail = 'dummy'
   password = 'dummy000'
+  mail_to_forward = 'dummy@example.com'
 
   test 'Create a new mail address' do
     assert_false Sakura::MailAddress.all.any? {|m| m.address == new_mail }
@@ -39,6 +40,19 @@ class MailAddressTest < Test::Unit::TestCase
     assert_false mail.virus_scan
   end
 
+  test 'Manipulate forwarding list' do
+    mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
+    assert_empty mail.forward_list
+
+    mail.forward_to(mail_to_forward)
+    mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
+    assert_equal mail.forward_list, [mail_to_forward]
+
+    mail.remove_forward_to(mail_to_forward)
+    mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
+    assert_empty mail.forward_list
+  end
+
   test 'Switch keeping mode' do
     mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
 
@@ -46,6 +60,7 @@ class MailAddressTest < Test::Unit::TestCase
     mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
     assert_true mail.keep
 
+    mail.forward_to(mail_to_forward)
     mail.keep = false
     mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
     assert_false mail.keep
