@@ -6,7 +6,7 @@ require 'sakura/mail_address'
 module Sakura
   module Cli
     class Mail < Thor
-      desc 'list', 'list all mail addresses of the domain'
+      desc 'list', 'List all mail addresses of the domain'
       def list
         addrs = MailAddress.all
 
