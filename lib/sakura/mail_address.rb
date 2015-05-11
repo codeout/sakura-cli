@@ -64,6 +64,20 @@ module Sakura
       true
     end
 
+    def quota=(value)
+      page = Client.current_session.process(MAIL_URL + @link) {
+        fill_in 'MailQuota', with: value
+        find('input[name="Submit_quotaedit"]').click
+      }
+
+      error = page.all('.error-message')
+      if error.empty?
+        true
+      else
+        raise error.first.text
+      end
+    end
+
     def to_s
       self.class.tabularize(@address, @virus_check, @usage, @quota)
     end
