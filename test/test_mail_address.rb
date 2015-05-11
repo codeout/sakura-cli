@@ -39,6 +39,18 @@ class MailAddressTest < Test::Unit::TestCase
     assert_false mail.virus_scan
   end
 
+  test 'Switch keeping mode' do
+    mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
+
+    mail.keep = true
+    mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
+    assert_true mail.keep
+
+    mail.keep = false
+    mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
+    assert_false mail.keep
+  end
+
   test 'Delete a mail address' do
     mail = Sakura::MailAddress.all.find {|m| m.address == new_mail }
 

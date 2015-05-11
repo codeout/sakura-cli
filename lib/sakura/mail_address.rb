@@ -94,6 +94,32 @@ module Sakura
       virus_scan = false
     end
 
+    def keep
+      if @keep.nil?
+        page = Client.current_session.get(MAIL_URL + @link)
+        @keep = page.find('input[name="Save"]:checked').value == '1'
+      end
+
+      @keep
+    end
+
+    def keep=(value)
+      value = value ? 1 : 0
+      Client.current_session.process(MAIL_URL + @link) do
+        find("input[name='Save'][value='#{value}']").click
+      end
+
+      @keep = value == 1
+    end
+
+    def enable_keep
+      keep = true
+    end
+
+    def disable_keep
+      keep = false
+    end
+
     def to_s
       self.class.tabularize(@address, @virus_scan, @usage, @quota)
     end
