@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Shintaro Kojima"]
   spec.email         = ["goodies@codeout.net"]
 
-  spec.summary       = %q{Command-line tool for Sakura's Rental Server}
-  spec.description   = %q{TBD}
+  spec.summary       = %q{Command-line tool for Sakura's Rental Server.}
+  spec.description   = %q{Command-line tool and client library to control the dashboard of Sakura Rental Server.}
   spec.homepage      = "https://github.com/codeout/sakura-cli"
   spec.license       = "MIT"
 
