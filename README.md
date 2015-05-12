@@ -1,39 +1,170 @@
-# Sakura::Cli
+# Sakura CLI
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/sakura/cli`. To experiment with that code, run `bin/console` for an interactive prompt.
+Sakura CLI は, [さくらのレンタルサーバー](http://www.sakura.ne.jp/)のコントロールパネルをコマンドラインから制御するためのツールです.
 
-TODO: Delete this and the text above, and describe your gem
+:construction: このバージョンでは, ライト/スタンダード/プレミアムに共通する **メールアドレス管理** 機能のみサポートします
 
-## Installation
+## セットアップ
 
-Add this line to your application's Gemfile:
+Sakura CLI をインストールします.
 
-```ruby
-gem 'sakura-cli'
+```zsh
+gem install sakura-cli
 ```
 
-And then execute:
+Sakura CLI は[PhantomJS](http://phantomjs.org/download.html) に依存しています.
+お使いのOS に合った方法でインストールしてください.
 
-    $ bundle
+Mac の場合は
 
-Or install it yourself as:
+```zsh
+brew install phantomjs
+```
 
-    $ gem install sakura-cli
+でもインストールできます.
 
-## Usage
+### 環境設定
 
-TODO: Write usage instructions here
+ログイン情報を環境変数に設定します.
 
-## Development
+```zsh
+export SAKURA_DOMAIN='example.com'
+export SAKURA_PASSWD='your_password'
+```
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/console` for an interactive prompt that will allow you to experiment.
+[dotenv](https://github.com/bkeepers/dotenv) を使うと便利かもしれません.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release` to create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```zsh
+# ~/.sakura.env (dotenv の場合)
 
-## Contributing
+SAKURA_DOMAIN='example.com'
+SAKURA_PASSWD='your_password'
+```
 
-1. Fork it ( https://github.com/[my-github-username]/sakura-cli/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+場合によっては[direnv](https://github.com/zimbatm/direnv) もいいでしょう.
+
+
+## 使いかた
+
+```sakura help``` や ```sakura mail help``` コマンドでヘルプが表示できます.
+
+```zsh
+$ sakura help
+Commands:
+  sakura help [COMMAND]  # Describe available commands or one specific command
+  sakura mail            # Manage mail addresses
+
+$ sakura mail help
+Commands:
+  sakura mail create LOCAL_PART [PASSWORD]             # Create a mail address
+  sakura mail delete LOCAL_PART                        # Delete a mail address
+  sakura mail forward LOCAL_PART [{add|remove} EMAIL]  # Add, remove or show mail address(es) to forward
+  sakura mail help [COMMAND]                           # Describe subcommands or one specific subcommand
+  sakura mail keep LOCAL_PART [enable|disable]         # Switch keep or flush mails
+  sakura mail list                                     # List all mail addresses of the domain
+  sakura mail password LOCAL_PART [PASSWORD]           # Update password of a mail address
+  sakura mail quota LOCAL_PART [VALUE]                 # Update or show quota of a mail address
+  sakura mail scan LOCAL_PART [enable|disable]         # Switch virus scan
+```
+
+### メールアドレス一覧
+
+```sakura mail list``` コマンドで, メールアドレス一覧とその概要を表示できます.
+
+```zsh
+$ sakura mail list
+# domain: example.com
+address              virus_scan        usage /     quota
+---------------------------------------------------------
+dummy                      true     379.13KB /     200MB
+dummy001                   true       1.79MB /       2GB
+dummy002                   true       6.28KB /       2GB
+postmaster                 true           0B /       2GB
+```
+
+### メールアドレス作成
+
+```sakura mail create``` コマンドで, メールアドレスを作成できます.
+
+```zsh
+$ sakura mail create dummy
+password?
+password(confirm)?
+```
+
+コマンド引数に初期パスワードを指定することもできます.
+
+### メールアドレス削除
+
+```sakura mail delete``` コマンドで, メールアドレスを削除できます.
+
+### クォータ表示・変更
+
+```sakura mail quota``` コマンドで, 現在のクォータを表示・変更できます.
+
+```zsh
+$ sakura mail quota dummy     # 現在のクォータを表示
+200MB
+
+$ sakura mail quota dummy 300 # 300MB に変更
+```
+
+変更する場合, 単位はMB です.
+
+### パスワード変更
+
+```sakura mail password``` コマンドで, パスワードをリセットできます.
+
+```zsh
+$ sakura mail password dummy
+password?
+password(confirm)?
+```
+
+コマンド引数に初期パスワードを指定することもできます.
+
+### メール転送
+
+```sakura mail forward``` コマンドで, 転送先リストを表示・編集できます.
+
+```zsh
+$ sakura mail forward dummy                         # 転送先リストを表示
+foo@example.com
+$ sakura mail forward dummy add bar@example.com     # 転送先に追加
+$ sakura mail forward dummy remove bar@example.com  # 転送先から削除
+```
+
+```sakura mail keep``` コマンドで, メールをメールボックスに残すか/転送専用にするか の設定を表示・変更できます.
+
+```zsh
+$ sakura mail keep dummy          # 設定を表示
+true
+$ sakura mail keep dummy disable  # メールボックスに残す
+```
+
+### ウィルスチェック
+
+```sakura mail scan``` コマンドで, ウィルスチェックの設定を表示・変更できます.
+
+```zsh
+$ sakura mail scan dummy         # ウィルスチェックの設定を表示
+false
+$ sakura mail scan dummy enable  # 有効にする
+```
+
+## その他
+
+### dotenv から起動
+
+```~/.sakura.env``` に環境変数一覧がある場合
+
+```zsh
+dotenv -f ~/.sakura.env sakura
+```
+
+のように実行します.
+
+
+## Copyright and License
+
+Copyright (c) 2015 Shintaro Kojima. Code released under the [MIT license](LICENSE).
