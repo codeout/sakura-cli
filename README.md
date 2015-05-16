@@ -65,6 +65,7 @@ Commands:
   sakura mail password LOCAL_PART [PASSWORD]           # Update password of a mail address
   sakura mail quota LOCAL_PART [VALUE]                 # Update or show quota of a mail address
   sakura mail scan LOCAL_PART [enable|disable]         # Switch virus scan
+  sakura mail show LOCAL_PART                          # Display information about a mail address
 ```
 
 ### メールアドレス一覧
@@ -80,6 +81,18 @@ dummy                      true     379.13KB /     200MB
 dummy001                   true       1.79MB /       2GB
 dummy002                   true       6.28KB /       2GB
 postmaster                 true           0B /       2GB
+```
+
+### メールアドレス詳細
+
+```sakura mail show``` コマンドで, あるメールアドレスの詳細を表示できます.
+
+```zsh
+$ sakura mail show dummy
+usage / quota: 379.13KB / 200MB
+forward_to:    foo@example.com
+keep mail?:    true
+virus_scan?:   false
 ```
 
 ### メールアドレス作成
