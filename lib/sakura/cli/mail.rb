@@ -67,7 +67,7 @@ module Sakura
         end
       end
 
-      desc 'scan LOCAL_PART [enable|disable]', 'Switch virus scan'
+      desc 'scan LOCAL_PART [enable|disable]', 'Switch virus scan configuration of a mail address'
       def scan(local_part, value=nil)
         self.class.handle_argument_error if value && value !~ /enable|disable/
 
@@ -111,7 +111,7 @@ module Sakura
         end
       end
 
-      desc 'keep LOCAL_PART [enable|disable]', 'Switch keep or flush mails'
+      desc 'keep LOCAL_PART [enable|disable]', 'Switch keep or flush configuration of a mail address'
       def keep(local_part, value=nil)
         self.class.handle_argument_error if value && value !~ /enable|disable/
 
