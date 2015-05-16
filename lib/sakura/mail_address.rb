@@ -98,9 +98,9 @@ module Sakura
       virus_scan = false
     end
 
-    def keep
+    def keep(page=nil)
       if @keep.nil?
-        page = Client.current_session.get(MAIL_URL + @link)
+        page ||= Client.current_session.get(MAIL_URL + @link)
         @keep = page.find('input[name="Save"]:checked').value == '1'
       end
 
@@ -124,9 +124,9 @@ module Sakura
       keep = false
     end
 
-    def forward_list
+    def forward_list(page=nil)
       if @forward_list.nil?
-        page = Client.current_session.get(MAIL_URL + @link)
+        page ||= Client.current_session.get(MAIL_URL + @link)
         @forward_list = page.all('select[name="DeleteAddress[]"] option').map(&:text)
       end
 
@@ -159,6 +159,17 @@ module Sakura
 
     def to_s
       self.class.tabularize(@address, @virus_scan, @usage, @quota)
+    end
+
+    def detail
+      page = Client.current_session.get(MAIL_URL + @link)
+
+      <<-EOS
+usage / quota: #{usage} / #{quota}
+forward_to:    #{forward_list(page).join(' ')}
+keep mail?:    #{keep(page)}
+virus_scan?:   #{virus_scan}
+      EOS
     end
   end
 end

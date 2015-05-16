@@ -132,6 +132,14 @@ module Sakura
         end
       end
 
+      desc 'show LOCAL_PART', 'Display information about a mail address'
+      def show(local_part)
+        mail = MailAddress.find(local_part)
+        abort %(No mail address: "#{local_part}") unless mail
+
+        puts mail.detail
+      end
+
 
       private
 
