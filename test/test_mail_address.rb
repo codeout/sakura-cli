@@ -1,6 +1,5 @@
 require 'test-unit'
 require 'sakura/mail_address'
-require 'pry'
 
 class MailAddressTest < Test::Unit::TestCase
   self.test_order = :defined
