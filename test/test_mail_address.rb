@@ -1,7 +1,7 @@
 require 'test-unit'
 require 'sakura/mail_address'
 
-class MailAddressTest < Test::Unit::TestCase
+class TestMailAddress < Test::Unit::TestCase
   self.test_order = :defined
   new_mail = 'dummy'
   password = 'dummy000'
