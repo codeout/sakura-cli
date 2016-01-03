@@ -19,7 +19,11 @@ Mac の場合は
 
 ```zsh
 brew install phantomjs
-brew install homebrew/versions/phantomjs192  # Yosemite or newer
+
+# Yosemite or newer
+brew cask install phantomjs
+brew install upx
+upx -d /opt/homebrew-cask/Caskroom/phantomjs/2.0.0/phantomjs-2.0.0-macosx/bin/phantomjs
 ```
 
 でもインストールできます.
