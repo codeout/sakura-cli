@@ -19,6 +19,7 @@ Mac の場合は
 
 ```zsh
 brew install phantomjs
+brew install homebrew/versions/phantomjs192  # Yosemite or newer
 ```
 
 でもインストールできます.
