@@ -32,7 +32,7 @@ module Sakura
       end
 
       def header
-        str = tabularize('address', 'virus_scan', 'usage', 'quota')
+        str = tabularize('address', 'virus_scan', 'usage', 'quota', '%')
         "#{str}\n#{'-' * (str.size+1)}"
       end
 
@@ -40,7 +40,8 @@ module Sakura
         args[0].ljust(20) <<
           args[1].to_s.rjust(11) <<
           "#{args[2]} /".to_s.rjust(15) <<
-          args[3].to_s.rjust(10)
+          args[3].to_s.rjust(10) <<
+          "  (#{args[4].to_s.rjust(3)})"
       end
     end
 
@@ -158,18 +159,40 @@ module Sakura
     end
 
     def to_s
-      self.class.tabularize(@address, @virus_scan, @usage, @quota)
+      self.class.tabularize(@address, @virus_scan, @usage, @quota, percentage(@usage, @quota))
     end
 
     def detail
       page = Client.current_session.get(MAIL_URL + @link)
 
       <<-EOS
-usage / quota: #{usage} / #{quota}
+usage / quota: #{usage} / #{quota}  (#{percentage(@usage, @quota)})
 forward_to:    #{forward_list(page).join(' ')}
 keep mail?:    #{keep(page)}
 virus_scan?:   #{virus_scan}
       EOS
+    end
+
+
+    private
+
+    def percentage(usage, quota)
+      usage, quota = [usage, quota].map {|i|
+        case i
+        when /([\d.]+)TB$/
+          $1.to_f * 1000000000000
+        when /([\d.]+)GB$/
+          $1.to_f * 1000000000
+        when /([\d.]+)MB$/
+          $1.to_f * 1000000
+        when /([\d.]+)KB$/
+          $1.to_f * 1000
+        when /([\d.]+)B$/
+          $1.to_i
+        end
+      }
+
+      "#{(usage*100/quota).to_i}%"
     end
   end
 end
