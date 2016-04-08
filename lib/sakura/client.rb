@@ -1,3 +1,4 @@
+require 'capybara/dsl'
 require 'capybara/poltergeist'
 require 'sakura'
 require 'sakura/cli/version'
