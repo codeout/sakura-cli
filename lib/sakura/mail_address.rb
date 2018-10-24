@@ -22,13 +22,20 @@ module Sakura
         page = Client.current_session.get(MAIL_URL)
 
         page.all(:xpath, '//a[contains(@href, "mail?Username=")]/../..').map{|element|
-          arguments = element.all('td').map(&:text)[0..-2] + element.all('a').map{|i| i[:href] }
-          MailAddress.new(*arguments)
+          MailAddress.new_from_element(element)
         }
       end
 
       def find(local_part)
-        all.find {|m| m.address == local_part }
+        page = Client.current_session.get(MAIL_URL)
+
+        element = page.find(:xpath, "//a[@href=\"mail?Username=#{local_part}\"]/../..")
+        MailAddress.new_from_element(element)
+      end
+
+      def new_from_element(element)
+        arguments = element.all('td').map(&:text)[0..-2] + element.all('a').map{|i| i[:href] }
+        MailAddress.new(*arguments)
       end
 
       def header
