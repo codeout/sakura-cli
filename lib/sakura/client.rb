@@ -1,10 +1,10 @@
 require 'capybara/dsl'
-require 'capybara/poltergeist'
+require 'selenium-webdriver'
+
 require 'sakura'
 require 'sakura/cli/version'
 
-Capybara.default_driver = :poltergeist
-Capybara.current_session.driver.headers = {'User-Agent' => "sakura-cli/#{Sakura::Cli::VERSION}"}
+Capybara.default_driver = :selenium_chrome_headless
 
 module Sakura
   class Client
