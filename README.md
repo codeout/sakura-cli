@@ -12,18 +12,13 @@ Sakura CLI をインストールします.
 gem install sakura-cli
 ```
 
-Sakura CLI は[PhantomJS](http://phantomjs.org/download.html) に依存しています.
+Sakura CLI は[ChromeDriver](https://chromedriver.chromium.org/downloads) に依存しています.
 お使いのOS に合った方法でインストールしてください.
 
 Mac の場合は
 
 ```zsh
-brew install phantomjs
-
-# Yosemite or newer
-brew cask install phantomjs
-brew install upx
-upx -d /opt/homebrew-cask/Caskroom/phantomjs/2.0.0/phantomjs-2.0.0-macosx/bin/phantomjs
+brew install chromedriver
 ```
 
 でもインストールできます.
@@ -80,12 +75,12 @@ Commands:
 ```zsh
 $ sakura mail list
 # domain: example.com
-address              virus_scan        usage /     quota
+address                     usage /     quota  (  %)
 ---------------------------------------------------------
-dummy                      true     379.13KB /     200MB
-dummy001                   true       1.79MB /       2GB
-dummy002                   true       6.28KB /       2GB
-postmaster                 true           0B /       2GB
+dummy                       893KB /     200MB  ( 0%)
+dummy001                   19.5MB /     200MB  ( 9%)
+dummy002                   11.4MB /     200MB  ( 5%)
+postmaster                 9.75MB /     200MB  ( 4%)
 ```
 
 ### メールアドレス詳細
@@ -94,7 +89,7 @@ postmaster                 true           0B /       2GB
 
 ```zsh
 $ sakura mail show dummy
-usage / quota: 379.13KB / 200MB
+usage / quota: 893KB / 200MB  ( 0%)
 forward_to:    foo@example.com
 keep mail?:    true
 virus_scan?:   false
