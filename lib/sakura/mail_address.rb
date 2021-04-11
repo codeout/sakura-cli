@@ -65,9 +65,11 @@ module Sakura
     end
 
     def delete
-      link = @link_to_delete
-      Client.current_session.process(MAIL_URL) do
-        find("a[href=\"#{link}\"]").click
+      # FIXME: The URL won't work when mail addresses are more than 300
+      Client.current_session.process(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/) do |page|
+        page.accept_confirm do
+          page.find('button.dangerous-button').click
+        end
       end
 
       true
