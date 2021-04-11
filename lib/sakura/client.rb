@@ -16,7 +16,6 @@ module Sakura
       @current_session ||= new
     end
 
-
     def initialize
       @domain, @passwd = credentials
     end
@@ -27,7 +26,7 @@ module Sakura
 
     def login
       visit BASE_URL
-      fill_in 'domain',   with: @domain
+      fill_in 'domain', with: @domain
       fill_in 'password', with: @passwd
       find('form input[type=image]').click
 
@@ -51,7 +50,6 @@ module Sakura
       raise_when_error
       page
     end
-
 
     private
 

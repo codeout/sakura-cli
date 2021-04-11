@@ -10,8 +10,8 @@ module Sakura
       def create(local_part, password)
         Client.current_session.process(MAIL_URL) do
           fill_in 'NewUsername', with: local_part
-          fill_in 'Password1',   with: password
-          fill_in 'Password2',   with: password
+          fill_in 'Password1', with: password
+          fill_in 'Password2', with: password
           find('input[name="Submit_useradd"]').click
         end
 
@@ -21,7 +21,7 @@ module Sakura
       def all
         page = Client.current_session.get(MAIL_URL)
 
-        page.all(:xpath, '//a[contains(@href, "mail?Username=")]/../..').map{|element|
+        page.all(:xpath, '//a[contains(@href, "mail?Username=")]/../..').map { |element|
           MailAddress.new_from_element(element)
         }
       end
@@ -34,13 +34,13 @@ module Sakura
       end
 
       def new_from_element(element)
-        arguments = element.all('td').map(&:text)[0..-2] + element.all('a').map{|i| i[:href] }
+        arguments = element.all('td').map(&:text)[0..-2] + element.all('a').map { |i| i[:href] }
         MailAddress.new(*arguments)
       end
 
       def header
         str = tabularize('address', 'virus_scan', 'usage', 'quota', '%')
-        "#{str}\n#{'-' * (str.size+1)}"
+        "#{str}\n#{'-' * (str.size + 1)}"
       end
 
       def tabularize(*args)
@@ -52,13 +52,12 @@ module Sakura
       end
     end
 
-
-    def initialize(address, virus_scan, usage, quota, link, link_to_delete=nil)
-      @address        = address
-      @virus_scan     = virus_scan == '○'
-      @usage          = usage
-      @quota          = quota
-      @link           = link
+    def initialize(address, virus_scan, usage, quota, link, link_to_delete = nil)
+      @address = address
+      @virus_scan = virus_scan == '○'
+      @usage = usage
+      @quota = quota
+      @link = link
       @link_to_delete = link_to_delete
     end
 
@@ -106,7 +105,7 @@ module Sakura
       virus_scan = false
     end
 
-    def keep(page=nil)
+    def keep(page = nil)
       if @keep.nil?
         page ||= Client.current_session.get(MAIL_URL + @link)
         @keep = page.find('input[name="Save"]:checked').value == '1'
@@ -132,7 +131,7 @@ module Sakura
       keep = false
     end
 
-    def forward_list(page=nil)
+    def forward_list(page = nil)
       if @forward_list.nil?
         page ||= Client.current_session.get(MAIL_URL + @link)
         @forward_list = page.all('select[name="DeleteAddress[]"] option').map(&:text)
@@ -180,11 +179,10 @@ virus_scan?:   #{virus_scan}
       EOS
     end
 
-
     private
 
     def percentage(usage, quota)
-      usage, quota = [usage, quota].map {|i|
+      usage, quota = [usage, quota].map { |i|
         case i
         when /([\d.]+)TB$/
           $1.to_f * 1000000000000
@@ -199,7 +197,7 @@ virus_scan?:   #{virus_scan}
         end
       }
 
-      "#{(usage*100/quota).to_i}%"
+      "#{(usage * 100 / quota).to_i}%"
     end
   end
 end

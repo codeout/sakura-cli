@@ -7,16 +7,18 @@ module Sakura
   module Cli
     class Mail < Thor
       desc 'list', 'List all mail addresses of the domain'
+
       def list
         addrs = MailAddress.all
 
         puts "# domain: #{Client.current_session.domain}"
         puts MailAddress.header
-        addrs.each {|addr| puts addr.to_s }
+        addrs.each { |addr| puts addr.to_s }
       end
 
       desc 'create LOCAL_PART [PASSWORD]', 'Create a mail address'
-      def create(local_part, password=nil)
+
+      def create(local_part, password = nil)
         password ||= ask_password
 
         begin
@@ -27,6 +29,7 @@ module Sakura
       end
 
       desc 'delete LOCAL_PART', 'Delete a mail address'
+
       def delete(local_part)
         mail = MailAddress.find(local_part)
         abort %(No mail address: "#{local_part}") unless mail
@@ -39,7 +42,8 @@ module Sakura
       end
 
       desc 'quota LOCAL_PART [VALUE]', 'Update or show quota of a mail address'
-      def quota(local_part, value=nil)
+
+      def quota(local_part, value = nil)
         mail = MailAddress.find(local_part)
         abort %(No mail address: "#{local_part}") unless mail
 
@@ -55,7 +59,8 @@ module Sakura
       end
 
       desc 'password LOCAL_PART [PASSWORD]', 'Update password of a mail address'
-      def password(local_part, password=nil)
+
+      def password(local_part, password = nil)
         password ||= ask_password
         mail = MailAddress.find(local_part)
         abort %(No mail address: "#{local_part}") unless mail
@@ -68,7 +73,8 @@ module Sakura
       end
 
       desc 'scan LOCAL_PART [enable|disable]', 'Switch virus scan configuration of a mail address'
-      def scan(local_part, value=nil)
+
+      def scan(local_part, value = nil)
         self.class.handle_argument_error if value && value !~ /enable|disable/
 
         mail = MailAddress.find(local_part)
@@ -89,7 +95,8 @@ module Sakura
       end
 
       desc 'forward LOCAL_PART [{add|remove} EMAIL]', 'Add, remove or show mail address(es) to forward'
-      def forward(local_part, operation=nil, mail_to_forward=nil)
+
+      def forward(local_part, operation = nil, mail_to_forward = nil)
         if (operation && operation !~ /add|remove/) || (!mail_to_forward && operation)
           self.class.handle_argument_error
         end
@@ -104,7 +111,7 @@ module Sakura
           when 'remove'
             mail.delete_forward_to mail_to_forward
           when nil
-            mail.forward_list.each {|m| puts m }
+            mail.forward_list.each { |m| puts m }
           end
         rescue
           abort $!
@@ -112,7 +119,8 @@ module Sakura
       end
 
       desc 'keep LOCAL_PART [enable|disable]', 'Switch keep or flush configuration of a mail address'
-      def keep(local_part, value=nil)
+
+      def keep(local_part, value = nil)
         self.class.handle_argument_error if value && value !~ /enable|disable/
 
         mail = MailAddress.find(local_part)
@@ -133,6 +141,7 @@ module Sakura
       end
 
       desc 'show LOCAL_PART', 'Display information about a mail address'
+
       def show(local_part)
         mail = MailAddress.find(local_part)
         abort %(No mail address: "#{local_part}") unless mail
@@ -140,13 +149,12 @@ module Sakura
         puts mail.detail
       end
 
-
       private
 
       def ask_password
         password = ask('password?', echo: false)
         puts
-        confirm  = ask('password(confirm)?', echo: false)
+        confirm = ask('password(confirm)?', echo: false)
         puts
         abort "password doesn't match" unless password == confirm
 
