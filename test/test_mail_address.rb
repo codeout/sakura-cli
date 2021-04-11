@@ -17,7 +17,7 @@ class TestMailAddress < Test::Unit::TestCase
     mail = Sakura::MailAddress.find(new_mail)
     old_value = mail.quota
 
-    mail.quota = old_value.to_i + 1
+    mail.quota = '2GB'
     mail = Sakura::MailAddress.find(new_mail)
     assert_not_equal mail.quota, old_value
   end
