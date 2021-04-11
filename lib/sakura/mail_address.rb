@@ -113,7 +113,8 @@ module Sakura
 
     def virus_scan(page = nil)
       if @virus_scan.nil?
-        raise 'Argument "page" is required' unless page
+        # FIXME: The URL won't work when mail addresses are more than 300
+        page ||= Client.current_session.get(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/)
         @virus_scan = page.find('[name="usesVirusCheck"]:checked').value == '1'
       end
 
@@ -121,12 +122,13 @@ module Sakura
     end
 
     def virus_scan=(value)
-      value = value ? 1 : 0
-      Client.current_session.process(MAIL_URL + @link) do
-        find("input[name='VirusScan'][value='#{value}']").click
+      # FIXME: The URL won't work when mail addresses are more than 300
+      Client.current_session.process(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/) do |page|
+        page.find("[name='usesVirusCheck'][value='#{value ? 1 : 0}']").choose
+        page.find(:xpath, '//button[text() = "保存する"]').click
       end
 
-      @virus_scan = value == 1
+      @virus_scan = value
     end
 
     def enable_virus_scan
