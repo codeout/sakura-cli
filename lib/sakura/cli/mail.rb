@@ -161,8 +161,12 @@ module Sakura
       def show(local_part)
         preprocess
 
-        mail = MailAddress.find(local_part)
-        abort %(No mail address: "#{local_part}") unless mail
+        begin
+          mail = MailAddress.find(local_part)
+        rescue Capybara::ElementNotFound
+          raise if options[:verbose]
+          abort %(No mail address: "#{local_part}")
+        end
 
         puts mail.detail
       end
