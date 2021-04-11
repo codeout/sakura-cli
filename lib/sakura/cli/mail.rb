@@ -28,6 +28,7 @@ module Sakura
         begin
           MailAddress.create local_part, password
         rescue
+          raise if options[:verbose]
           abort $!
         end
       end
@@ -47,6 +48,7 @@ module Sakura
         begin
           mail.delete
         rescue
+          raise if options[:verbose]
           abort $!
         end
       end
@@ -66,6 +68,7 @@ module Sakura
             puts mail.quota
           end
         rescue
+          raise if options[:verbose]
           abort $!
         end
       end
@@ -82,6 +85,7 @@ module Sakura
         begin
           mail.password = password
         rescue
+          raise if options[:verbose]
           abort $!
         end
       end
@@ -106,6 +110,7 @@ module Sakura
             puts mail.virus_scan
           end
         rescue
+          raise if options[:verbose]
           abort $!
         end
       end
@@ -132,6 +137,7 @@ module Sakura
             mail.forward_list.each { |m| puts m }
           end
         rescue
+          raise if options[:verbose]
           abort $!
         end
       end
@@ -156,6 +162,7 @@ module Sakura
             puts mail.keep
           end
         rescue
+          raise if options[:verbose]
           abort $!
         end
       end
