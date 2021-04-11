@@ -102,10 +102,12 @@ module Sakura
     end
 
     def password=(value)
-      Client.current_session.process(MAIL_URL + @link) do
-        fill_in 'Password1', with: value
-        fill_in 'Password2', with: value
-        find('input[name="Submit_password"]').click
+      # FIXME: The URL won't work when mail addresses are more than 300
+      Client.current_session.process(MAIL_URL + "1/password/#{@address}", /#{@address}のパスワード設定/) do |page|
+        page.find_all(:xpath, '//label[contains(text(), "パスワード")]/..//input').each do |e|
+          e.fill_in with: value
+        end
+        page.find(:xpath, '//button[text() = "変更する"]').click
       end
     end
 

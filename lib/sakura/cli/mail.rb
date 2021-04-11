@@ -71,8 +71,7 @@ module Sakura
         preprocess
 
         password ||= ask_password
-        mail = MailAddress.find(local_part)
-        abort %(No mail address: "#{local_part}") unless mail
+        mail = find(local_part)
 
         begin
           mail.password = password
