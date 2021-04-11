@@ -39,14 +39,7 @@ module Sakura
         preprocess
 
         begin
-          mail = MailAddress.find(local_part)
-        rescue Capybara::ElementNotFound
-          raise if options[:verbose]
-          abort %(No mail address: "#{local_part}")
-        end
-
-        begin
-          mail.delete
+          find(local_part).delete
         rescue
           raise if options[:verbose]
           abort $!
@@ -58,8 +51,7 @@ module Sakura
       def quota(local_part, value = nil)
         preprocess
 
-        mail = MailAddress.find(local_part)
-        abort %(No mail address: "#{local_part}") unless mail
+        mail = find(local_part)
 
         begin
           if value
@@ -172,6 +164,16 @@ module Sakura
       def show(local_part)
         preprocess
 
+        puts find(local_part).detail
+      end
+
+      private
+
+      def preprocess
+        Client.verbose = true if options[:verbose]
+      end
+
+      def find(local_part)
         begin
           mail = MailAddress.find(local_part)
         rescue Capybara::ElementNotFound
@@ -179,13 +181,7 @@ module Sakura
           abort %(No mail address: "#{local_part}")
         end
 
-        puts mail.detail
-      end
-
-      private
-
-      def preprocess
-        Client.verbose = true if options[:verbose]
+        mail
       end
 
       def ask_password
