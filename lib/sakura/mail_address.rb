@@ -8,11 +8,15 @@ module Sakura
 
     class << self
       def create(local_part, password)
-        Client.current_session.process(MAIL_URL) do
-          fill_in 'NewUsername', with: local_part
-          fill_in 'Password1', with: password
-          fill_in 'Password2', with: password
-          find('input[name="Submit_useradd"]').click
+        Client.current_session.process(MAIL_URL, /メールアドレス一覧/) do |page|
+          page.first(:xpath, '//a[text() = "新規追加"]').click
+
+          page.find(:xpath, '//label[contains(text(), "ユーザ名")]/..//input')
+              .fill_in with: local_part
+          page.find_all(:xpath, '//label[contains(text(), "パスワード")]/..//input').each do |e|
+            e.fill_in with: password
+          end
+          page.find(:xpath, '//button[text() = "作成する"]').click
         end
 
         true

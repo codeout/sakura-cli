@@ -62,10 +62,11 @@ module Sakura
       page
     end
 
-    def process(url, &block)
+    def process(url, expected, &block)
       login unless login?
-      visit url
-      instance_eval &block
+
+      get url, expected
+      yield page
 
       raise_when_error
       page
@@ -85,8 +86,10 @@ module Sakura
     end
 
     def raise_when_error
-      error = page.all('.error')
-      raise error.first.text unless error.empty?
+      %w[.error .input-error].each do |cls|
+        error = page.all(cls)
+        raise error.first.text unless error.empty?
+      end
     end
 
     def wait_for_loading
