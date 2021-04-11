@@ -141,7 +141,8 @@ module Sakura
 
     def keep(page = nil)
       if @keep.nil?
-        raise 'Argument "page" is required' unless page
+        # FIXME: The URL won't work when mail addresses are more than 300
+        page ||= Client.current_session.get(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/)
         @keep = page.find('[name="receiveType"]:checked').value == '1'
       end
 
@@ -149,12 +150,13 @@ module Sakura
     end
 
     def keep=(value)
-      value = value ? 1 : 0
-      Client.current_session.process(MAIL_URL + @link) do
-        find("input[name='Save'][value='#{value}']").click
+      # FIXME: The URL won't work when mail addresses are more than 300
+      Client.current_session.process(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/) do |page|
+        page.find("[name='receiveType'][value='#{value ? 1 : 2}']").choose
+        page.find(:xpath, '//button[text() = "保存する"]').click
       end
 
-      @keep = value == 1
+      @keep = value
     end
 
     def enable_keep
