@@ -11,6 +11,7 @@ module Sakura
     include Capybara::DSL
 
     attr_reader :domain
+    @@verbose = false
 
     class << self
       def current_session
