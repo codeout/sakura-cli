@@ -114,8 +114,7 @@ module Sakura
           self.class.handle_argument_error
         end
 
-        mail = MailAddress.find(local_part)
-        abort %(No mail address: "#{local_part}") unless mail
+        mail = find(local_part)
 
         begin
           case operation

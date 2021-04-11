@@ -169,7 +169,8 @@ module Sakura
 
     def forward_list(page = nil)
       if @forward_list.nil?
-        raise 'Argument "page" is required' unless page
+        # FIXME: The URL won't work when mail addresses are more than 300
+        page ||= Client.current_session.get(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/)
         @forward_list = page.find(:xpath, '//label[contains(text(), "転送先アドレス")]/..//textarea').value.split(/[\n,]+/)
       end
 
@@ -177,26 +178,26 @@ module Sakura
     end
 
     def forward_to(mail)
-      Client.current_session.process(MAIL_URL + @link) do
-        execute_script <<-JS
-          var f = document.Transfer;
-          f.Address.value = '#{mail}';
-          f.SubAction.value = 'add';
-          f.submit();
-        JS
+      # FIXME: The URL won't work when mail addresses are more than 300
+      Client.current_session.process(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/) do |page|
+        @forward_list = page.find(:xpath, '//label[contains(text(), "転送先アドレス")]/..//textarea').value.split(/[\n,]+/)
+        page.find(:xpath, '//label[contains(text(), "転送先アドレス")]/..//textarea')
+            .fill_in with: (@forward_list + [mail]).uniq.join("\n")
+        page.find(:xpath, '//button[text() = "保存する"]').click
       end
 
-      @forward_list ||= []
       @forward_list << mail
     end
 
     def delete_forward_to(mail)
-      Client.current_session.process(MAIL_URL + @link) do
-        find_field('DeleteAddress[]').select(mail)
-        find('a[href="javascript:tr_delete();"]').click
+      # FIXME: The URL won't work when mail addresses are more than 300
+      Client.current_session.process(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/) do |page|
+        @forward_list = page.find(:xpath, '//label[contains(text(), "転送先アドレス")]/..//textarea').value.split(/[\n,]+/)
+        page.find(:xpath, '//label[contains(text(), "転送先アドレス")]/..//textarea')
+            .fill_in with: (@forward_list - [mail]).uniq.join("\n")
+        page.find(:xpath, '//button[text() = "保存する"]').click
       end
 
-      @forward_list ||= []
       @forward_list.delete mail
     end
 
