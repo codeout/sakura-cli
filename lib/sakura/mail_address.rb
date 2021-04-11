@@ -2,9 +2,9 @@ require 'sakura/client'
 
 module Sakura
   class MailAddress
-    MAIL_URL = BASE_URL + 'users/list'
+    MAIL_URL = BASE_URL + 'users/list/'
 
-    attr_reader :address, :virus_scan, :usage, :quota, :link, :link_to_delete
+    attr_reader :address, :usage, :quota, :link
 
     class << self
       def create(local_part, password)
@@ -28,9 +28,10 @@ module Sakura
       end
 
       def find(local_part)
-        page = Client.current_session.get(MAIL_URL)
+        page = Client.current_session.get(MAIL_URL, /メールアドレス一覧/)
+        page.first('.input-text').select('300件')
 
-        element = page.find(:xpath, "//a[@href=\"mail?Username=#{local_part}\"]/../..")
+        element = page.find(:xpath, "//div[contains(@class, \"entity-lists-row\")]//div[@class=\"username\" and contains(text(), \"#{local_part}\")]/../../..")
         MailAddress.new_from_element(element)
       end
 
@@ -86,6 +87,15 @@ module Sakura
       end
     end
 
+    def virus_scan(page = nil)
+      if @virus_scan.nil?
+        raise 'Argument "page" is required' unless page
+        @virus_scan = page.find('[name="usesVirusCheck"]:checked').value == '1'
+      end
+
+      @virus_scan
+    end
+
     def virus_scan=(value)
       value = value ? 1 : 0
       Client.current_session.process(MAIL_URL + @link) do
@@ -105,8 +115,8 @@ module Sakura
 
     def keep(page = nil)
       if @keep.nil?
-        page ||= Client.current_session.get(MAIL_URL + @link)
-        @keep = page.find('input[name="Save"]:checked').value == '1'
+        raise 'Argument "page" is required' unless page
+        @keep = page.find('[name="receiveType"]:checked').value == '1'
       end
 
       @keep
@@ -131,8 +141,8 @@ module Sakura
 
     def forward_list(page = nil)
       if @forward_list.nil?
-        page ||= Client.current_session.get(MAIL_URL + @link)
-        @forward_list = page.all('select[name="DeleteAddress[]"] option').map(&:text)
+        raise 'Argument "page" is required' unless page
+        @forward_list = page.find(:xpath, '//label[contains(text(), "転送先アドレス")]/..//textarea').value.split(/[\n,]+/)
       end
 
       @forward_list
@@ -167,13 +177,14 @@ module Sakura
     end
 
     def detail
-      page = Client.current_session.get(MAIL_URL + @link)
+      # FIXME: The URL won't work when mail addresses are more than 300
+      page = Client.current_session.get(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/)
 
       <<-EOS
 usage / quota: #{usage} / #{quota}  (#{percentage(@usage, @quota)})
 forward_to:    #{forward_list(page).join(' ')}
 keep mail?:    #{keep(page)}
-virus_scan?:   #{virus_scan}
+virus_scan?:   #{virus_scan(page)}
       EOS
     end
 
