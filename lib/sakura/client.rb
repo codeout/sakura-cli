@@ -21,24 +21,34 @@ module Sakura
     end
 
     def login?
-      !@last_login.nil?
+      @logged_in
     end
 
     def login
       visit BASE_URL
-      fill_in 'domain', with: @domain
-      fill_in 'password', with: @passwd
-      find('form input[type=image]').click
+      fill_in 'login-username', with: @domain
+      fill_in 'login-password', with: @passwd
+      find('form button[type=submit]').click
 
-      @last_login = Time.now if page.text =~ /ログインドメイン: #{@domain}/
+      wait_for_loading
+
+      if page.text =~ /サーバコントロールパネル ホーム/
+        @logged_in = true
+      end
 
       raise_when_error
       login?
     end
 
-    def get(url)
+    def get(url, expected)
       login unless login?
       visit url
+
+      wait_for_loading
+      unless page.text =~ expected
+        raise Timeout::Error.new('Timed out')
+      end
+
       page
     end
 
@@ -65,8 +75,14 @@ module Sakura
     end
 
     def raise_when_error
-      error = page.all('.error-message')
+      error = page.all('.error')
       raise error.first.text unless error.empty?
+    end
+
+    def wait_for_loading
+      5.times do
+        break if find_all('読み込み中').empty?
+      end
     end
   end
 end
