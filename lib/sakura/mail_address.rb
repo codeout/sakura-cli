@@ -76,13 +76,29 @@ module Sakura
     end
 
     def quota=(value)
-      page = Client.current_session.process(MAIL_URL + @link) {
-        fill_in 'MailQuota', with: value
-        find('input[name="Submit_quotaedit"]').click
-      }
+      # FIXME: The URL won't work when mail addresses are more than 300
+      Client.current_session.process(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/) do |page|
+        case value
+        when /(\d+)\s*GB$/
+          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//input').fill_in with: $1
+          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//select').select 'GB'
+        when /(\d+)\s*MB$/
+          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//input').fill_in with: $1
+          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//select').select 'MB'
+        when /(\d+)\s*KB$/
+          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//input').fill_in with: $1
+          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//select').select 'KB'
+        when /(\d+)\s*B$/
+          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//input').fill_in with: $1
+          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//select').select 'B'
+        else
+          raise %(Unsupported quota value "#{value}")
+        end
 
-      page.text =~ /利用中のディスク領域: \S+ \/ (\S+)/
-      @quota = $1
+        page.find(:xpath, '//button[text() = "保存する"]').click
+      end
+
+      @quota = value
     end
 
     def password=(value)
