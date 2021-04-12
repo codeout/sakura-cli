@@ -17,7 +17,7 @@ class TestMailAddress < Test::Unit::TestCase
     mail = Sakura::MailAddress.find(new_mail)
     old_value = mail.quota
 
-    mail.quota = old_value.to_i + 1
+    mail.quota = '2GB'
     mail = Sakura::MailAddress.find(new_mail)
     assert_not_equal mail.quota, old_value
   end
@@ -43,11 +43,11 @@ class TestMailAddress < Test::Unit::TestCase
     mail = Sakura::MailAddress.find(new_mail)
     assert_empty mail.forward_list
 
-    mail.forward_to(mail_to_forward)
+    mail.forward_to mail_to_forward
     mail = Sakura::MailAddress.find(new_mail)
     assert_equal mail.forward_list, [mail_to_forward]
 
-    mail.delete_forward_to(mail_to_forward)
+    mail.delete_forward_to mail_to_forward
     mail = Sakura::MailAddress.find(new_mail)
     assert_empty mail.forward_list
   end
@@ -59,10 +59,22 @@ class TestMailAddress < Test::Unit::TestCase
     mail = Sakura::MailAddress.find(new_mail)
     assert_true mail.keep
 
-    mail.forward_to(mail_to_forward)
+    mail.forward_to mail_to_forward
     mail.keep = false
     mail = Sakura::MailAddress.find(new_mail)
     assert_false mail.keep
+  end
+
+  test 'Switch spam filter' do
+    mail = Sakura::MailAddress.find(new_mail)
+
+    mail.spam_filter = :disable
+    mail = Sakura::MailAddress.find(new_mail)
+    assert_equal :disable, mail.spam_filter
+
+    mail.spam_filter = :quarantine
+    mail = Sakura::MailAddress.find(new_mail)
+    assert_equal :quarantine, mail.spam_filter
   end
 
   test 'Delete a mail address' do

@@ -21,7 +21,6 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "capybara"
   spec.add_runtime_dependency "selenium-webdriver"
-  spec.add_runtime_dependency "chromedriver-helper"
   spec.add_runtime_dependency "thor"
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"

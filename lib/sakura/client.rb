@@ -11,47 +11,66 @@ module Sakura
     include Capybara::DSL
 
     attr_reader :domain
+    @@verbose = false
 
-    def self.current_session
-      @current_session ||= new
+    class << self
+      def current_session
+        @current_session ||= new
+      end
+
+      def verbose=(bool)
+        @@verbose = !!bool
+      end
     end
-
 
     def initialize
       @domain, @passwd = credentials
     end
 
     def login?
-      !@last_login.nil?
+      @logged_in
     end
 
     def login
-      visit BASE_URL
-      fill_in 'domain',   with: @domain
-      fill_in 'password', with: @passwd
-      find('form input[type=image]').click
+      $stderr.puts 'login' if @@verbose
 
-      @last_login = Time.now if page.text =~ /ログインドメイン: #{@domain}/
+      visit BASE_URL
+      fill_in 'login-username', with: @domain
+      fill_in 'login-password', with: @passwd
+      find('form button[type=submit]').click
+
+      wait_for_loading
+
+      if page.text =~ /サーバコントロールパネル ホーム/
+        @logged_in = true
+      end
 
       raise_when_error
       login?
     end
 
-    def get(url)
+    def get(url, expected)
       login unless login?
+
+      $stderr.puts "visit #{url}" if @@verbose
       visit url
+      wait_for_loading
+      unless page.text =~ expected
+        raise Timeout::Error.new('Timed out')
+      end
+
       page
     end
 
-    def process(url, &block)
+    def process(url, expected, &block)
       login unless login?
-      visit url
-      instance_eval &block
+
+      get url, expected
+      yield page
 
       raise_when_error
       page
     end
-
 
     private
 
@@ -67,8 +86,20 @@ module Sakura
     end
 
     def raise_when_error
-      error = page.all('.error-message')
-      raise error.first.text unless error.empty?
+      %w[.error .input-error].each do |cls|
+        error = page.all(cls)
+        raise error.first.text unless error.empty?
+      end
+    end
+
+    def wait_for_loading
+      5.times do
+        if find_all('読み込み中').empty?
+          break
+        else
+          $stderr.puts 'still loading ...' if @@verbose
+        end
+      end
     end
   end
 end
