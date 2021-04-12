@@ -155,6 +155,28 @@ module Sakura
         end
       end
 
+      desc 'filter LOCAL_PART [mark|disable|discard|quarantine]', 'Configure spam filter of a mail address'
+
+      def filter(local_part, value = nil)
+        preprocess
+
+        self.class.handle_argument_error if value && value !~ /mark|disable|discard|quarantine/
+
+        mail = find(local_part)
+
+        begin
+          case value
+          when nil
+            puts mail.spam_filter
+          else
+            mail.spam_filter = value.to_sym
+          end
+        rescue
+          raise if options[:verbose]
+          abort $!
+        end
+      end
+
       desc 'show LOCAL_PART', 'Display information about a mail address'
 
       def show(local_part)

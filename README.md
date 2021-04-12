@@ -93,6 +93,7 @@ usage / quota: 893KB / 200MB  ( 0%)
 forward_to:    foo@example.com
 keep mail:     true
 virus scan:    false
+spam filter:   disable
 ```
 
 ### メールアドレス作成

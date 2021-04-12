@@ -65,6 +65,18 @@ class TestMailAddress < Test::Unit::TestCase
     assert_false mail.keep
   end
 
+  test 'Switch spam filter' do
+    mail = Sakura::MailAddress.find(new_mail)
+
+    mail.spam_filter = :disable
+    mail = Sakura::MailAddress.find(new_mail)
+    assert_equal :disable, mail.spam_filter
+
+    mail.spam_filter = :quarantine
+    mail = Sakura::MailAddress.find(new_mail)
+    assert_equal :quarantine, mail.spam_filter
+  end
+
   test 'Delete a mail address' do
     mail = Sakura::MailAddress.find(new_mail)
 

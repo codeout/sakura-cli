@@ -167,6 +167,49 @@ module Sakura
       keep = false
     end
 
+    def spam_filter(page = nil)
+      if @spam_filter.nil?
+        # FIXME: The URL won't work when mail addresses are more than 300
+        page ||= Client.current_session.get(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/)
+
+        case page.find(:xpath, '//label[contains(text(), "迷惑メールフィルタ")]/..//select').value
+        when "0"
+          @spam_filter = :disable
+        when "1"
+          @spam_filter = :quarantine
+        when "2"
+          @spam_filter = :discard
+        when "3"
+          @spam_filter = :mark
+        end
+      end
+
+      @spam_filter
+    end
+
+    def spam_filter=(value)
+      # FIXME: The URL won't work when mail addresses are more than 300
+      Client.current_session.process(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/) do |page|
+        select = page.find(:xpath, '//label[contains(text(), "迷惑メールフィルタ")]/..//select')
+
+        value = value.to_sym
+        case value
+        when :disable
+          select.select '利用しない'
+        when :quarantine
+          select.select '「迷惑メール」フォルダに保存'
+        when :discard
+          select.select 'メールを破棄'
+        when :mark
+          select.select 'フィルタの利用'
+        end
+
+        page.find(:xpath, '//button[text() = "保存する"]').click
+      end
+
+      @spam_filter = value
+    end
+
     def forward_list(page = nil)
       if @forward_list.nil?
         # FIXME: The URL won't work when mail addresses are more than 300
@@ -212,8 +255,9 @@ module Sakura
       <<-EOS
 usage / quota: #{usage} / #{quota}  (#{percentage(@usage, @quota)})
 forward_to:    #{forward_list(page).join(' ')}
-keep mail?:    #{keep(page)}
-virus_scan?:   #{virus_scan(page)}
+keep mail:     #{keep(page)}
+virus scan:    #{virus_scan(page)}
+spam filter:   #{spam_filter(page)}
       EOS
     end
 
