@@ -24,7 +24,7 @@ module Sakura
 
       def all
         page = Client.current_session.get(MAIL_URL, /メールアドレス一覧/)
-        page.first('.input-text').select('300件')
+        page.first('.input-text').select '300件'
 
         page.all(:css, '.entity-lists .entity-lists-row').map { |element|
           MailAddress.new_from_element(element)
@@ -33,7 +33,7 @@ module Sakura
 
       def find(local_part)
         page = Client.current_session.get(MAIL_URL, /メールアドレス一覧/)
-        page.first('.input-text').select('300件')
+        page.first('.input-text').select '300件'
 
         element = page.find(:xpath, "//div[contains(@class, \"entity-lists-row\")]//div[@class=\"username\" and contains(text(), \"#{local_part}\")]/../../..")
         MailAddress.new_from_element(element)

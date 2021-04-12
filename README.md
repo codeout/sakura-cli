@@ -91,8 +91,8 @@ postmaster                 9.75MB /     200MB  ( 4%)
 $ sakura mail show dummy
 usage / quota: 893KB / 200MB  ( 0%)
 forward_to:    foo@example.com
-keep mail?:    true
-virus_scan?:   false
+keep mail:     true
+virus scan:    false
 ```
 
 ### メールアドレス作成

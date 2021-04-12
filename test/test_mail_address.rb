@@ -43,11 +43,11 @@ class TestMailAddress < Test::Unit::TestCase
     mail = Sakura::MailAddress.find(new_mail)
     assert_empty mail.forward_list
 
-    mail.forward_to(mail_to_forward)
+    mail.forward_to mail_to_forward
     mail = Sakura::MailAddress.find(new_mail)
     assert_equal mail.forward_list, [mail_to_forward]
 
-    mail.delete_forward_to(mail_to_forward)
+    mail.delete_forward_to mail_to_forward
     mail = Sakura::MailAddress.find(new_mail)
     assert_empty mail.forward_list
   end
@@ -59,7 +59,7 @@ class TestMailAddress < Test::Unit::TestCase
     mail = Sakura::MailAddress.find(new_mail)
     assert_true mail.keep
 
-    mail.forward_to(mail_to_forward)
+    mail.forward_to mail_to_forward
     mail.keep = false
     mail = Sakura::MailAddress.find(new_mail)
     assert_false mail.keep
