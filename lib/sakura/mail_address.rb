@@ -68,7 +68,7 @@ module Sakura
       # FIXME: The URL won't work when mail addresses are more than 300
       Client.current_session.process(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/) do |page|
         page.accept_confirm do
-          page.find('button.dangerous-button').click
+          page.find('button.is-dangerous').click
         end
       end
 
