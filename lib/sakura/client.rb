@@ -41,7 +41,7 @@ module Sakura
 
       wait_for_loading
 
-      if page.text =~ /サーバコントロールパネル ホーム/
+      if page.text =~ /サーバーコントロールパネル ホーム/
         @logged_in = true
       end
 
