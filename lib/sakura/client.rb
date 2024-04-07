@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'capybara/dsl'
 require 'selenium-webdriver'
 
@@ -11,15 +13,14 @@ module Sakura
     include Capybara::DSL
 
     attr_reader :domain
-    @@verbose = false
+
+    @verbose = false
 
     class << self
+      attr_accessor :verbose
+
       def current_session
         @current_session ||= new
-      end
-
-      def verbose=(bool)
-        @@verbose = !!bool
       end
     end
 
@@ -32,18 +33,24 @@ module Sakura
     end
 
     def login
-      $stderr.puts 'login' if @@verbose
+      warn 'login' if self.class.verbose
 
       visit BASE_URL
-      fill_in 'login-username', with: @domain
-      fill_in 'login-password', with: @passwd
+      fill_in 'username', with: @domain
+      fill_in 'password', with: @passwd
       find('form button[type=submit]').click
+
+      if has_text?('認証コード')
+        puts '認証コード:'
+        otp = $stdin.gets
+
+        fill_in 'login-otp', with: otp
+        find('form button[type=submit]').click
+      end
 
       wait_for_loading
 
-      if page.text =~ /サーバーコントロールパネル ホーム/
-        @logged_in = true
-      end
+      @logged_in = true if page.text =~ /サーバーコントロールパネル ホーム/
 
       raise_when_error
       login?
@@ -52,17 +59,15 @@ module Sakura
     def get(url, expected)
       login unless login?
 
-      $stderr.puts "visit #{url}" if @@verbose
+      warn "visit #{url}" if self.class.verbose
       visit url
       wait_for_loading
-      unless page.text =~ expected
-        raise Timeout::Error.new('Timed out')
-      end
+      raise Timeout::Error, 'Timed out' unless page.text =~ expected
 
       page
     end
 
-    def process(url, expected, &block)
+    def process(url, expected)
       login unless login?
 
       get url, expected
@@ -94,11 +99,9 @@ module Sakura
 
     def wait_for_loading
       5.times do
-        if find_all('読み込み中').empty?
-          break
-        else
-          $stderr.puts 'still loading ...' if @@verbose
-        end
+        break if find_all('読み込み中').empty?
+
+        warn 'still loading ...' if self.class.verbose
       end
     end
   end

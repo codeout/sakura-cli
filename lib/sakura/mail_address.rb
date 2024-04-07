@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'sakura/client'
 
 module Sakura
   class MailAddress
-    MAIL_URL = BASE_URL + 'users/list/'
+    MAIL_URL = "#{BASE_URL}users/list/".freeze
 
     attr_reader :address, :usage, :quota, :link
 
@@ -26,16 +28,21 @@ module Sakura
         page = Client.current_session.get(MAIL_URL, /メールアドレス一覧/)
         page.first('.input-text').select '300件'
 
-        page.all(:css, '.entity-lists .entity-lists-row').map { |element|
+        page.all(:css, '.entity-lists .entity-lists-row').map do |element|
           MailAddress.new_from_element(element)
-        }
+        end
       end
 
       def find(local_part)
         page = Client.current_session.get(MAIL_URL, /メールアドレス一覧/)
         page.first('.input-text').select '300件'
 
-        element = page.find(:xpath, "//div[contains(@class, \"entity-lists-row\")]//div[@class=\"username\" and contains(text(), \"#{local_part}\")]/../../..")
+        element = page.find(
+          :xpath,
+          # rubocop:disable Layout/LineLength
+          "//div[contains(@class, \"entity-lists-row\")]//div[@class=\"username\" and contains(text(), \"#{local_part}\")]/../../.."
+          # rubocop:enable Layout/LineLength
+        )
         MailAddress.new_from_element(element)
       end
 
@@ -61,7 +68,7 @@ module Sakura
 
     def initialize(address, usage)
       @address = address
-      @usage, @quota = usage.split(/\s*\/\s*/)
+      @usage, @quota = usage.split(%r{\s*/\s*})
     end
 
     def delete
@@ -80,16 +87,16 @@ module Sakura
       Client.current_session.process(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/) do |page|
         case value
         when /(\d+)\s*GB$/
-          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//input').fill_in with: $1
+          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//input').fill_in with: ::Regexp.last_match(1)
           page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//select').select 'GB'
         when /(\d+)\s*MB$/
-          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//input').fill_in with: $1
+          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//input').fill_in with: ::Regexp.last_match(1)
           page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//select').select 'MB'
         when /(\d+)\s*KB$/
-          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//input').fill_in with: $1
+          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//input').fill_in with: ::Regexp.last_match(1)
           page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//select').select 'KB'
         when /(\d+)\s*B$/
-          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//input').fill_in with: $1
+          page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//input').fill_in with: ::Regexp.last_match(1)
           page.find(:xpath, '//label[contains(text(), "メール容量制限")]/..//select').select 'B'
         else
           raise %(Unsupported quota value "#{value}")
@@ -132,11 +139,11 @@ module Sakura
     end
 
     def enable_virus_scan
-      virus_scan = true
+      true
     end
 
     def disable_virus_scan
-      virus_scan = false
+      false
     end
 
     def keep(page = nil)
@@ -160,11 +167,11 @@ module Sakura
     end
 
     def enable_keep
-      keep = true
+      true
     end
 
     def disable_keep
-      keep = false
+      false
     end
 
     def spam_filter(page = nil)
@@ -173,13 +180,13 @@ module Sakura
         page ||= Client.current_session.get(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/)
 
         case page.find(:xpath, '//label[contains(text(), "迷惑メールフィルタ")]/..//select').value
-        when "0"
+        when '0'
           @spam_filter = :disable
-        when "1"
+        when '1'
           @spam_filter = :quarantine
-        when "2"
+        when '2'
           @spam_filter = :discard
-        when "3"
+        when '3'
           @spam_filter = :mark
         end
       end
@@ -252,32 +259,32 @@ module Sakura
       # FIXME: The URL won't work when mail addresses are more than 300
       page = Client.current_session.get(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/)
 
-      <<-EOS
-usage / quota: #{usage} / #{quota}  (#{percentage(@usage, @quota)})
-forward_to:    #{forward_list(page).join(' ')}
-keep mail:     #{keep(page)}
-virus scan:    #{virus_scan(page)}
-spam filter:   #{spam_filter(page)}
-      EOS
+      <<~END_OF_STRING
+        usage / quota: #{usage} / #{quota}  (#{percentage(@usage, @quota)})
+        forward_to:    #{forward_list(page).join(' ')}
+        keep mail:     #{keep(page)}
+        virus scan:    #{virus_scan(page)}
+        spam filter:   #{spam_filter(page)}
+      END_OF_STRING
     end
 
     private
 
     def percentage(usage, quota)
-      usage, quota = [usage, quota].map { |i|
+      usage, quota = [usage, quota].map do |i|
         case i
         when /([\d.]+)TB$/
-          $1.to_f * 1000000000000
+          ::Regexp.last_match(1).to_f * 1_000_000_000_000
         when /([\d.]+)GB$/
-          $1.to_f * 1000000000
+          ::Regexp.last_match(1).to_f * 1_000_000_000
         when /([\d.]+)MB$/
-          $1.to_f * 1000000
+          ::Regexp.last_match(1).to_f * 1_000_000
         when /([\d.]+)KB$/
-          $1.to_f * 1000
+          ::Regexp.last_match(1).to_f * 1000
         when /([\d.]+)B$/
-          $1.to_i
+          ::Regexp.last_match(1).to_i
         end
-      }
+      end
 
       "#{(usage * 100 / quota).to_i}%"
     end
