@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'test-unit'
 require 'sakura/mail_address'
 
@@ -8,9 +10,9 @@ class TestMailAddress < Test::Unit::TestCase
   mail_to_forward = 'dummy@example.com'
 
   test 'Create a new mail address' do
-    assert_false Sakura::MailAddress.all.any? {|m| m.address == new_mail }
-    assert_true  Sakura::MailAddress.create(new_mail, password)
-    assert_true  Sakura::MailAddress.all.any? {|m| m.address == new_mail }
+    assert_false(Sakura::MailAddress.all.any? { |m| m.address == new_mail })
+    assert_true Sakura::MailAddress.create(new_mail, password)
+    assert_true(Sakura::MailAddress.all.any? { |m| m.address == new_mail })
   end
 
   test 'Increase the quota' do
@@ -82,6 +84,6 @@ class TestMailAddress < Test::Unit::TestCase
 
     assert_not_nil mail
     assert_true mail.delete
-    assert_false Sakura::MailAddress.all.any? {|m| m.address == new_mail }
+    assert_false(Sakura::MailAddress.all.any? { |m| m.address == new_mail })
   end
 end

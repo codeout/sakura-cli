@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+require 'English'
 require 'thor'
 require 'sakura'
 require 'sakura/client'
@@ -15,7 +18,7 @@ module Sakura
 
         puts "# domain: #{Client.current_session.domain}"
         puts MailAddress.header
-        addrs.each { |addr| puts addr.to_s }
+        addrs.each { |addr| puts addr }
       end
 
       desc 'create LOCAL_PART [PASSWORD]', 'Create a mail address'
@@ -27,9 +30,10 @@ module Sakura
 
         begin
           MailAddress.create local_part, password
-        rescue
+        rescue StandardError
           raise if options[:verbose]
-          abort $!
+
+          abort $ERROR_INFO
         end
       end
 
@@ -40,9 +44,10 @@ module Sakura
 
         begin
           find(local_part).delete
-        rescue
+        rescue StandardError
           raise if options[:verbose]
-          abort $!
+
+          abort $ERROR_INFO
         end
       end
 
@@ -59,9 +64,10 @@ module Sakura
           else
             puts mail.quota
           end
-        rescue
+        rescue StandardError
           raise if options[:verbose]
-          abort $!
+
+          abort $ERROR_INFO
         end
       end
 
@@ -75,9 +81,10 @@ module Sakura
 
         begin
           mail.password = password
-        rescue
+        rescue StandardError
           raise if options[:verbose]
-          abort $!
+
+          abort $ERROR_INFO
         end
       end
 
@@ -99,9 +106,10 @@ module Sakura
           when nil
             puts mail.virus_scan
           end
-        rescue
+        rescue StandardError
           raise if options[:verbose]
-          abort $!
+
+          abort $ERROR_INFO
         end
       end
 
@@ -110,9 +118,7 @@ module Sakura
       def forward(local_part, operation = nil, mail_to_forward = nil)
         preprocess
 
-        if (operation && operation !~ /add|remove/) || (!mail_to_forward && operation)
-          self.class.handle_argument_error
-        end
+        self.class.handle_argument_error if (operation && operation !~ /add|remove/) || (!mail_to_forward && operation)
 
         mail = find(local_part)
 
@@ -125,9 +131,10 @@ module Sakura
           when nil
             mail.forward_list.each { |m| puts m }
           end
-        rescue
+        rescue StandardError
           raise if options[:verbose]
-          abort $!
+
+          abort $ERROR_INFO
         end
       end
 
@@ -149,9 +156,10 @@ module Sakura
           when nil
             puts mail.keep
           end
-        rescue
+        rescue StandardError
           raise if options[:verbose]
-          abort $!
+
+          abort $ERROR_INFO
         end
       end
 
@@ -171,9 +179,10 @@ module Sakura
           else
             mail.spam_filter = value.to_sym
           end
-        rescue
+        rescue StandardError
           raise if options[:verbose]
-          abort $!
+
+          abort $ERROR_INFO
         end
       end
 
@@ -196,6 +205,7 @@ module Sakura
           mail = MailAddress.find(local_part)
         rescue Capybara::ElementNotFound
           raise if options[:verbose]
+
           abort %(No mail address: "#{local_part}")
         end
 
@@ -213,7 +223,7 @@ module Sakura
       end
 
       def abort(message)
-        super "\nERROR: #{message}"
+        super("\nERROR: #{message}")
       end
     end
   end
