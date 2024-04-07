@@ -14,7 +14,7 @@ module Sakura
 
     attr_reader :domain
 
-    @@verbose = false
+    @verbose = false
 
     class << self
       def current_session
@@ -22,7 +22,7 @@ module Sakura
       end
 
       def verbose=(bool)
-        @@verbose = !!bool
+        @verbose = !!bool
       end
     end
 
@@ -35,7 +35,7 @@ module Sakura
     end
 
     def login
-      warn 'login' if @@verbose
+      warn 'login' if @verbose
 
       visit BASE_URL
       fill_in 'username', with: @domain
@@ -61,7 +61,7 @@ module Sakura
     def get(url, expected)
       login unless login?
 
-      warn "visit #{url}" if @@verbose
+      warn "visit #{url}" if @verbose
       visit url
       wait_for_loading
       raise Timeout::Error, 'Timed out' unless page.text =~ expected
@@ -103,7 +103,7 @@ module Sakura
       5.times do
         break if find_all('読み込み中').empty?
 
-        warn 'still loading ...' if @@verbose
+        warn 'still loading ...' if @verbose
       end
     end
   end

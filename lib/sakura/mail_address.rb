@@ -37,8 +37,12 @@ module Sakura
         page = Client.current_session.get(MAIL_URL, /メールアドレス一覧/)
         page.first('.input-text').select '300件'
 
-        element = page.find(:xpath,
-                            "//div[contains(@class, \"entity-lists-row\")]//div[@class=\"username\" and contains(text(), \"#{local_part}\")]/../../..")
+        element = page.find(
+          :xpath,
+          # rubocop:disable Layout/LineLength
+          "//div[contains(@class, \"entity-lists-row\")]//div[@class=\"username\" and contains(text(), \"#{local_part}\")]/../../.."
+          # rubocop:enable Layout/LineLength
+        )
         MailAddress.new_from_element(element)
       end
 
@@ -255,13 +259,13 @@ module Sakura
       # FIXME: The URL won't work when mail addresses are more than 300
       page = Client.current_session.get(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/)
 
-      <<~EOS
+      <<~END_OF_STRING
         usage / quota: #{usage} / #{quota}  (#{percentage(@usage, @quota)})
         forward_to:    #{forward_list(page).join(' ')}
         keep mail:     #{keep(page)}
         virus scan:    #{virus_scan(page)}
         spam filter:   #{spam_filter(page)}
-      EOS
+      END_OF_STRING
     end
 
     private
