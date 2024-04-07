@@ -35,8 +35,8 @@ module Sakura
       $stderr.puts 'login' if @@verbose
 
       visit BASE_URL
-      fill_in 'login-username', with: @domain
-      fill_in 'login-password', with: @passwd
+      fill_in 'username', with: @domain
+      fill_in 'password', with: @passwd
       find('form button[type=submit]').click
 
       wait_for_loading
