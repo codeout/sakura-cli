@@ -74,6 +74,7 @@ module Sakura
       yield page
 
       raise_when_error
+      wait_for_loading
       page
     end
 
@@ -99,7 +100,7 @@ module Sakura
 
     def wait_for_loading
       5.times do
-        break if find_all('読み込み中').empty?
+        break if all('読み込み中').empty?
 
         warn 'still loading ...' if self.class.verbose
       end
