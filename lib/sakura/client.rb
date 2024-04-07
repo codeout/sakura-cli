@@ -74,6 +74,7 @@ module Sakura
       yield page
 
       raise_when_error
+      wait_for_loading
       page
     end
 

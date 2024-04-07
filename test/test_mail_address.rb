@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'securerandom'
 require 'test-unit'
 require 'sakura/mail_address'
 
@@ -26,7 +27,7 @@ class TestMailAddress < Test::Unit::TestCase
 
   test 'Change the password' do
     mail = Sakura::MailAddress.find(new_mail)
-    assert_nothing_raised { mail.password = password }
+    assert_nothing_raised { mail.password = SecureRandom.base64(20) }
   end
 
   test 'Switch virus scan' do

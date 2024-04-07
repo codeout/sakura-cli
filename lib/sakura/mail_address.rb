@@ -18,6 +18,7 @@ module Sakura
           page.find_all(:xpath, '//label[contains(text(), "パスワード")]/..//input').each do |e|
             e.fill_in with: password
           end
+          page.find(:xpath, '//label[contains(text(), "メールの受信")]/..//*[contains(text(), "受信する")]/../input').choose
           page.find(:xpath, '//button[text() = "作成する"]').click
         end
 
@@ -26,7 +27,8 @@ module Sakura
 
       def all
         page = Client.current_session.get(MAIL_URL, /メールアドレス一覧/)
-        page.first('.input-text').select '300件'
+        page.find('.input-text.page-limit-selector').select '300件'
+        wait_for_loading page
 
         page.all(:css, '.entity-lists .entity-lists-row').map do |element|
           MailAddress.new_from_element(element)
@@ -35,12 +37,13 @@ module Sakura
 
       def find(local_part)
         page = Client.current_session.get(MAIL_URL, /メールアドレス一覧/)
-        page.first('.input-text').select '300件'
+        page.find('.input-text.page-limit-selector').select '300件'
+        wait_for_loading page
 
         element = page.find(
           :xpath,
           # rubocop:disable Layout/LineLength
-          "//div[contains(@class, \"entity-lists-row\")]//div[@class=\"username\" and contains(text(), \"#{local_part}\")]/../../.."
+          "//div[contains(@class, \"entities-item\")]//div[@class=\"username\" and contains(text(), \"#{local_part}\")]/../../.."
           # rubocop:enable Layout/LineLength
         )
         MailAddress.new_from_element(element)
@@ -49,7 +52,7 @@ module Sakura
       def new_from_element(element)
         MailAddress.new(
           element.find('.username').text.split('@').first,
-          element.find('.capacity').text
+          element.find('.col-usage').text
         )
       end
 
@@ -64,11 +67,21 @@ module Sakura
           args[2].to_s.rjust(10) <<
           "  (#{args[3].to_s.rjust(3)})"
       end
+
+      private
+
+      def wait_for_loading(page)
+        5.times do
+          break if page.all('読み込み中').empty?
+
+          warn 'still loading ...' if self.class.verbose
+        end
+      end
     end
 
     def initialize(address, usage)
       @address = address
-      @usage, @quota = usage.split(%r{\s*/\s*})
+      @usage, @quota = usage.split(%r{\s*/\s*|\s+})
     end
 
     def delete
@@ -122,7 +135,7 @@ module Sakura
       if @virus_scan.nil?
         # FIXME: The URL won't work when mail addresses are more than 300
         page ||= Client.current_session.get(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/)
-        @virus_scan = page.find('[name="usesVirusCheck"]:checked').value == '1'
+        @virus_scan = page.find('[name="usesMailVirusCheck"]:checked').value == '1'
       end
 
       @virus_scan
@@ -131,7 +144,7 @@ module Sakura
     def virus_scan=(value)
       # FIXME: The URL won't work when mail addresses are more than 300
       Client.current_session.process(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/) do |page|
-        page.find("[name='usesVirusCheck'][value='#{value ? 1 : 0}']").choose
+        page.find("[name='usesMailVirusCheck'][value='#{value ? 1 : 0}']").choose
         page.find(:xpath, '//button[text() = "保存する"]').click
       end
 
@@ -150,7 +163,7 @@ module Sakura
       if @keep.nil?
         # FIXME: The URL won't work when mail addresses are more than 300
         page ||= Client.current_session.get(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/)
-        @keep = page.find('[name="receiveType"]:checked').value == '1'
+        @keep = page.find('[name="mailReceiveType"]:checked').value == '1'
       end
 
       @keep
@@ -159,7 +172,8 @@ module Sakura
     def keep=(value)
       # FIXME: The URL won't work when mail addresses are more than 300
       Client.current_session.process(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/) do |page|
-        page.find("[name='receiveType'][value='#{value ? 1 : 2}']").choose
+        text = value ? '受信する' : '転送専用'
+        page.find(:xpath, "//label[contains(text(), \"メールの受信\")]/..//*[contains(text(), \"#{text}\")]/../input").choose
         page.find(:xpath, '//button[text() = "保存する"]').click
       end
 
@@ -179,15 +193,20 @@ module Sakura
         # FIXME: The URL won't work when mail addresses are more than 300
         page ||= Client.current_session.get(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/)
 
-        case page.find(:xpath, '//label[contains(text(), "迷惑メールフィルタ")]/..//select').value
-        when '0'
-          @spam_filter = :disable
+        case page.find("[name='spamFilterType']:checked").value
         when '1'
-          @spam_filter = :quarantine
+          @spam_filter = :disable
         when '2'
-          @spam_filter = :discard
+          case page.find("[name='spamFilterAction']").value
+          when '1'
+            @spam_filter = :quarantine
+          when '2'
+            @spam_filter = :discard
+          when '3'
+            @spam_filter = :mark
+          end
         when '3'
-          @spam_filter = :mark
+          @spam_filter = :precise
         end
       end
 
@@ -197,20 +216,27 @@ module Sakura
     def spam_filter=(value)
       # FIXME: The URL won't work when mail addresses are more than 300
       Client.current_session.process(MAIL_URL + "1/edit/#{@address}", /#{@address}の設定/) do |page|
-        select = page.find(:xpath, '//label[contains(text(), "迷惑メールフィルタ")]/..//select')
-
-        value = value.to_sym
-        case value
+        text = nil
+        action = nil
+        case value.to_sym
         when :disable
-          select.select '利用しない'
+          text = '利用しない'
         when :quarantine
-          select.select '「迷惑メール」フォルダに保存'
+          text = '簡易' # "迷惑メールフィルタ" doesn't work
+          action = '「迷惑メール」フォルダに保存 [推奨]'
         when :discard
-          select.select 'メールを破棄'
+          text = '簡易' # "迷惑メールフィルタ" doesn't work
+          action = 'メールを破棄'
         when :mark
-          select.select 'フィルタの利用'
+          text = '簡易' # "迷惑メールフィルタ" doesn't work
+          action = 'フィルタの利用'
+        when :precise
+          '高精度迷惑メールフィルタ'
         end
 
+        page.find(:xpath,
+                  "//label[contains(text(), \"迷惑メールフィルタ\")]/..//*[contains(text(), \"#{text}\")]/../input").choose
+        page.find("[name='spamFilterAction']").select action if action
         page.find(:xpath, '//button[text() = "保存する"]').click
       end
 
