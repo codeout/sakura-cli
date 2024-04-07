@@ -15,7 +15,7 @@ module Sakura
 
           page.find(:xpath, '//label[contains(text(), "ユーザ名")]/..//input')
               .fill_in with: local_part
-          page.find_all(:xpath, '//label[contains(text(), "パスワード")]/..//input').each do |e|
+          page.all(:xpath, '//label[contains(text(), "パスワード")]/..//input').each do |e|
             e.fill_in with: password
           end
           page.find(:xpath, '//label[contains(text(), "メールの受信")]/..//*[contains(text(), "受信する")]/../input').choose
@@ -30,7 +30,7 @@ module Sakura
         page.find('.input-text.page-limit-selector').select '300件'
         wait_for_loading page
 
-        page.all(:css, '.entity-lists .entity-lists-row').map do |element|
+        page.all('.entities-item').map do |element|
           MailAddress.new_from_element(element)
         end
       end
@@ -124,7 +124,7 @@ module Sakura
     def password=(value)
       # FIXME: The URL won't work when mail addresses are more than 300
       Client.current_session.process(MAIL_URL + "1/password/#{@address}", /#{@address}のパスワード設定/) do |page|
-        page.find_all(:xpath, '//label[contains(text(), "パスワード")]/..//input').each do |e|
+        page.all(:xpath, '//label[contains(text(), "パスワード")]/..//input').each do |e|
           e.fill_in with: value
         end
         page.find(:xpath, '//button[text() = "変更する"]').click
