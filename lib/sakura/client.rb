@@ -39,6 +39,14 @@ module Sakura
       fill_in 'password', with: @passwd
       find('form button[type=submit]').click
 
+      if has_text?('認証コード')
+        puts '認証コード:'
+        otp = STDIN.gets
+
+        fill_in 'login-otp', with: otp
+        find('form button[type=submit]').click
+      end
+
       wait_for_loading
 
       if page.text =~ /サーバーコントロールパネル ホーム/
