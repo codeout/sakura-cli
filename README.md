@@ -181,4 +181,4 @@ dotenv -f ~/.sakura.env sakura
 
 ## Copyright and License
 
-Copyright (c) 2015-2024 Shintaro Kojima. Code released under the [MIT license](LICENSE).
+Copyright (c) 2015-2025 Shintaro Kojima. Code released under the [MIT license](LICENSE).
