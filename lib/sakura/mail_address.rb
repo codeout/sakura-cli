@@ -10,7 +10,7 @@ module Sakura
 
     class << self
       def create(local_part, password)
-        Client.current_session.process(MAIL_URL, /メールアドレス一覧/) do |page|
+        Client.current_session.process(MAIL_URL, /メールアドレス/) do |page|
           page.first(:xpath, '//a[text() = "新規追加"]').click
 
           page.find(:xpath, '//label[contains(text(), "ユーザ名")]/..//input')
@@ -26,7 +26,7 @@ module Sakura
       end
 
       def all
-        page = Client.current_session.get(MAIL_URL, /メールアドレス一覧/)
+        page = Client.current_session.get(MAIL_URL, /メールアドレス/)
         page.find('.input-text.page-limit-selector').select '300件'
         wait_for_loading page
 
@@ -36,7 +36,7 @@ module Sakura
       end
 
       def find(local_part)
-        page = Client.current_session.get(MAIL_URL, /メールアドレス一覧/)
+        page = Client.current_session.get(MAIL_URL, /メールアドレス/)
         page.find('.input-text.page-limit-selector').select '300件'
         wait_for_loading page
 
@@ -63,7 +63,7 @@ module Sakura
 
       def tabularize(*args)
         args[0].ljust(20) <<
-          "#{args[1]} /".to_s.rjust(15) <<
+          "#{args[1]} /".rjust(15) <<
           args[2].to_s.rjust(10) <<
           "  (#{args[3].to_s.rjust(3)})"
       end
@@ -229,7 +229,7 @@ module Sakura
           action = 'メールを破棄'
         when :mark
           text = '簡易' # "迷惑メールフィルタ" doesn't work
-          action = 'フィルタの利用'
+          action = 'フィルターのみ利用'
         when :precise
           '高精度迷惑メールフィルタ'
         end
