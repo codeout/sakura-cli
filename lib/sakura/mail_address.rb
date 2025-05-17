@@ -63,7 +63,7 @@ module Sakura
 
       def tabularize(*args)
         args[0].ljust(20) <<
-          "#{args[1]} /".to_s.rjust(15) <<
+          "#{args[1]} /".rjust(15) <<
           args[2].to_s.rjust(10) <<
           "  (#{args[3].to_s.rjust(3)})"
       end
