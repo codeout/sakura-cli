@@ -20,9 +20,9 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'capybara'
-  spec.add_runtime_dependency 'selenium-webdriver'
-  spec.add_runtime_dependency 'thor'
+  spec.add_dependency 'capybara'
+  spec.add_dependency 'selenium-webdriver'
+  spec.add_dependency 'thor'
   spec.required_ruby_version = '>= 3.0.0'
   spec.metadata['rubygems_mfa_required'] = 'true'
 end
