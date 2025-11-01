@@ -13,12 +13,13 @@ module Sakura
         Client.current_session.process(MAIL_URL, /メールアドレス/) do |page|
           page.first(:xpath, '//a[text() = "新規追加"]').click
 
-          page.find(:xpath, '//label[contains(text(), "ユーザ名")]/..//input')
+          page.find(:xpath, '//label[contains(text(), "ユーザー名")]/..//input')
               .fill_in with: local_part
           page.all(:xpath, '//label[contains(text(), "パスワード")]/..//input').each do |e|
             e.fill_in with: password
           end
           page.find(:xpath, '//label[contains(text(), "メールの受信")]/..//*[contains(text(), "受信する")]/../input').choose
+          page.find(:xpath, '//label[contains(text(), "迷惑メールフィルター")]/..//*[contains(text(), "利用しない")]/../input').choose
           page.find(:xpath, '//button[text() = "作成する"]').click
         end
 
